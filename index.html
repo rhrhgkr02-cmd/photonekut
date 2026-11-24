@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F7F7F7" />
+  <title>PHOTO BOOTH ✦ 우리 학교 인생네컷</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Space+Mono:wght@400;700&family=Press+Start+2P&family=Nanum+Pen+Script&family=Jua&family=Gothic+A1:wght@400;700&family=Nanum+Myeongjo:wght@700&family=Gaegu:wght@700&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-screen="home">
+
+  <!-- ===== 상단 바 (촬영 중에는 숨김) ===== -->
+  <header class="topbar" id="topbar">
+    <div class="brand-mark" aria-label="PHOTO BOOTH">
+      <svg class="cam-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="14" rx="4"/><circle cx="12" cy="13" r="4"/><path d="M8 6l1.6-2.5h4.8L16 6"/><circle cx="18" cy="9.2" r=".9" class="dot"/></svg>
+      <span>PHOTO<i>✦</i>BOOTH</span>
+    </div>
+    <nav class="stepper" id="stepper" hidden aria-label="진행 단계">
+      <ol>
+        <li class="step"><b>1</b><span>프레임</span></li>
+        <li class="step"><b>2</b><span>촬영</span></li>
+        <li class="step"><b>3</b><span>확인</span></li>
+        <li class="step"><b>4</b><span>고르기</span></li>
+        <li class="step"><b>5</b><span>보정</span></li>
+        <li class="step"><b>6</b><span>꾸미기</span></li>
+        <li class="step"><b>7</b><span>스티커</span></li>
+        <li class="step"><b>8</b><span>전송</span></li>
+      </ol>
+      <div class="step-mobile"><span id="stepLabel"></span><div class="step-track"><i id="stepBar"></i></div></div>
+    </nav>
+  </header>
+
+  <main class="stage">
+
+    <!-- ===== HOME ===== -->
+    <section class="screen active" data-screen="home">
+      <div class="hero">
+        <canvas id="homeStripL" class="hero-strip left" aria-hidden="true"></canvas>
+        <canvas id="homeStripR" class="hero-strip right" aria-hidden="true"></canvas>
+        <div class="hero-center">
+          <span class="pill-label"><i class="blink"></i> SCHOOL FESTIVAL EDITION</span>
+          <span class="pill-label test" id="homeTestBadge" hidden>부스 모드 · 이 기기에 저장</span>
+          <div class="hero-title">
+            <span class="est">EST</span>
+            <h1>PHOTO<br class="br-m"> BOOTH</h1>
+            <span class="est">2026</span>
+          </div>
+          <p class="hero-sub">찍고, 고르고, 꾸미고, 선생님께 보내면 끝!<br>설치 없이 바로 만드는 우리들의 네컷 ✦</p>
+          <div class="mode-buttons">
+            <button class="btn btn-pink btn-xl" id="btnStudent" type="button">
+              학생 · 사진 찍기
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="14" rx="4"/><circle cx="12" cy="13" r="4"/></svg>
+            </button>
+            <button class="btn btn-ghost btn-lg" id="btnTeacher" type="button">선생님 모드</button>
+          </div>
+          <p class="code-chip" id="codeChip" hidden><i></i>입장 코드 <b id="codeChipVal"></b> 연결됨 · <button class="text-btn" id="btnCodeChange" type="button">변경</button></p>
+          <ul class="hero-steps" aria-hidden="true">
+            <li>프레임</li><li>8컷 촬영</li><li>고르기</li><li>보정</li><li>꾸미기</li><li>스티커</li><li>전송</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 입장 코드 (학생) ===== -->
+    <section class="screen" data-screen="code">
+      <div class="screen-head">
+        <p class="eyebrow">ENTER CODE</p>
+        <h2>입장 코드를 입력하세요</h2>
+        <p class="lead" id="codeHint">선생님이 알려준 숫자 4자리예요.</p>
+      </div>
+      <form class="card code-card" id="codeForm" autocomplete="off">
+        <input class="code-input" id="codeInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" aria-label="입장 코드 4자리" />
+        <p class="gate-error" id="codeError" role="alert"></p>
+        <button class="btn btn-primary btn-lg" id="btnCodeEnter" type="submit">입장하기 →</button>
+        <p class="code-note">한 번 입력하면 이 기기에서 코드 기간 동안 기억해요.</p>
+      </form>
+      <div class="action-bar">
+        <button class="btn btn-ghost" id="btnCodeBack" type="button">← 처음</button>
+      </div>
+    </section>
+
+    <!-- ===== 선생님 모드: 입장 ===== -->
+    <section class="screen" data-screen="tlogin">
+      <div class="gate">
+        <form class="card gate-card" id="tLoginForm" autocomplete="off">
+          <p class="eyebrow">TEACHER MODE</p>
+          <h1>선생님 모드</h1>
+          <p id="tLoginHint">비밀번호를 입력하세요.</p>
+          <input class="text-input" id="tPw" type="password" placeholder="••••" aria-label="선생님 비밀번호" />
+          <button class="btn btn-primary btn-lg" id="tLoginBtn" type="submit">입장하기</button>
+          <p class="gate-error" id="tLoginErr" role="alert"></p>
+          <button class="text-btn" id="tLoginBack" type="button">← 처음으로</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== 선생님 모드: 대시보드 ===== -->
+    <section class="screen" data-screen="teacher">
+      <div class="admin-head">
+        <div>
+          <p class="eyebrow">TEACHER MODE <span class="pill-label test" id="tModeBadge" hidden>부스 모드</span></p>
+          <h1>학생들이 보낸 사진</h1>
+        </div>
+        <div class="row-gap">
+          <span class="live" id="tLive"><i></i><span id="tLiveText">연결 중</span></span>
+          <button class="btn btn-ghost" id="tLogout" type="button">학생 화면으로 ↩</button>
+        </div>
+      </div>
+
+      <div class="card code-panel">
+        <div class="code-main">
+          <p class="code-label">학생 입장 코드 <span class="code-tag" id="tCodeTag"></span></p>
+          <div class="code-digits" id="tCode">----</div>
+          <p class="code-meta" id="tCodeMeta"></p>
+        </div>
+        <div class="code-actions">
+          <button class="btn btn-pink btn-lg" id="tNewCode" type="button">＋ 새 코드 만들기 (3일)</button>
+          <p class="code-help">코드는 여러 개 만들 수 있고, 각각 3일 동안 보관돼요.<br>반·시간대별로 코드를 나눠 써도 좋아요.</p>
+        </div>
+        <div class="code-list-wrap">
+          <p class="code-list-head" id="tCodeListHead" hidden>보관 중인 코드 · 눌러서 불러오기 / 삭제</p>
+          <div class="code-list" id="tCodeList"></div>
+        </div>
+      </div>
+
+      <div class="filter-line">
+        <b id="tCodeFilter">모든 코드의 사진</b>
+        <button class="text-btn" id="tShowAll" type="button" hidden>모든 코드 사진 보기</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><small>전체</small><b id="statAll">0</b></div>
+        <div class="stat"><small>인쇄 대기</small><b id="statWait">0</b></div>
+        <div class="stat"><small>인쇄 완료</small><b id="statDone">0</b></div>
+      </div>
+      <div class="toolbar">
+        <div class="tabs" id="tTabs">
+          <button class="on" data-filter="all" type="button">전체</button>
+          <button data-filter="wait" type="button">인쇄 대기</button>
+          <button data-filter="done" type="button">인쇄 완료</button>
+        </div>
+        <div class="row-gap">
+          <label class="switch"><input type="checkbox" id="soundOn" checked /> 새 사진 알림음</label>
+          <button class="text-btn" id="tRefresh" type="button">지금 새로고침</button>
+        </div>
+      </div>
+      <div class="gallery" id="gallery"></div>
+      <div class="empty" id="empty" hidden><b>아직 도착한 사진이 없어요</b>학생이 전송하면 몇 초 안에 이 화면에 자동으로 나타나요.</div>
+    </section>
+
+    <!-- ===== STEP 1. 프레임 선택 ===== -->
+    <section class="screen" data-screen="layout">
+      <div class="screen-head">
+        <p class="eyebrow">STEP 01 — FRAME</p>
+        <h2>어떤 모양으로 뽑을까요?</h2>
+        <p class="lead">마음에 드는 레이아웃을 눌러 선택하세요.</p>
+      </div>
+      <div class="layout-grid" id="layoutGrid"></div>
+      <div class="action-bar">
+        <button class="btn btn-ghost" id="btnLayoutBack" type="button">← 처음</button>
+        <button class="btn btn-primary btn-lg" id="btnLayoutNext" type="button" disabled>이 프레임으로 촬영하기 →</button>
+      </div>
+    </section>
+
+    <!-- ===== STEP 2. 촬영 ===== -->
+    <section class="screen" data-screen="shoot">
+      <div class="screen-head compact hide-capturing">
+        <p class="eyebrow">STEP 02 — SHOOT</p>
+        <h2 id="shootTitle">8장 연속 촬영</h2>
+        <p class="lead" id="shootSub"></p>
+      </div>
+      <div class="camera-body">
+        <div class="cam-top">
+          <span class="rec"><i></i> REC</span>
+          <span class="shot-counter">SHOT <b id="shotCounter">00 / 08</b></span>
+          <span class="remain" id="remainLabel">남은 촬영 8장</span>
+        </div>
+        <div class="viewfinder" id="viewfinder">
+          <video id="video" class="mirror" autoplay playsinline muted></video>
+          <div class="crop-guide" id="cropGuide"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
+          <div class="countdown" id="countdown" aria-live="assertive"></div>
+
+          <div class="shoot-intro" id="shootIntro">
+            <p>준비되면 아래 버튼을 눌러요<br><small>8초 · 8초 · 8초 … 총 8번 찍어요</small></p>
+            <button class="btn btn-pink btn-xl" id="btnShootStart" type="button">● 촬영 시작</button>
+          </div>
+
+          <div class="cam-error" id="camError" hidden>
+            <strong>카메라를 사용할 수 없어요</strong>
+            <p id="camErrorMsg"></p>
+            <div class="row">
+              <button class="btn btn-primary" id="btnCamRetry" type="button">다시 시도</button>
+              <button class="btn btn-ghost" id="btnCamDemo" type="button">샘플 사진으로 체험</button>
+            </div>
+          </div>
+          <button class="icon-btn switch-cam" id="btnSwitchCam" type="button" hidden aria-label="전면/후면 카메라 전환">⇄</button>
+        </div>
+        <div class="progress-segs" id="progressSegs" aria-hidden="true"></div>
+        <div class="film-roll" id="filmRoll"></div>
+      </div>
+    </section>
+
+    <!-- ===== STEP 3-A. 다시 찍을까요? ===== -->
+    <section class="screen" data-screen="review">
+      <div class="screen-head">
+        <p class="eyebrow">STEP 03 — CHECK</p>
+        <h2>다시 찍으시겠습니까?</h2>
+        <p class="lead">다시 찍기는 <b>딱 1번</b>만 할 수 있어요. 다시 찍으면 두 세트를 비교해서 고를 수 있어요.</p>
+      </div>
+      <div class="card set-card">
+        <div class="set-tag tag-sky">SET A · 방금 찍은 8장</div>
+        <div class="thumb-grid" id="reviewGrid"></div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-ghost btn-lg" id="btnRetake" type="button">↻ 다시 찍기 (1회 가능)</button>
+        <button class="btn btn-primary btn-lg" id="btnProceed" type="button">그냥 이 사진으로 진행하기 →</button>
+      </div>
+    </section>
+
+    <!-- ===== STEP 3-B. A/B 세트 비교 ===== -->
+    <section class="screen" data-screen="compare">
+      <div class="screen-head">
+        <p class="eyebrow">STEP 03 — COMPARE</p>
+        <h2>어느 세트로 할까요?</h2>
+        <p class="lead">고르지 않은 세트는 <b>바로 삭제</b>되고 되돌릴 수 없어요.</p>
+      </div>
+      <div class="compare-wrap">
+        <button class="card compare-card" data-set="A" type="button" aria-pressed="false">
+          <div class="set-tag tag-sky">A · 처음 찍은 사진</div>
+          <div class="thumb-grid" id="compareGridA"></div>
+          <span class="radio" aria-hidden="true"></span>
+        </button>
+        <div class="vs" aria-hidden="true">VS</div>
+        <button class="card compare-card" data-set="B" type="button" aria-pressed="false">
+          <div class="set-tag tag-pink">B · 다시 찍은 사진</div>
+          <div class="thumb-grid" id="compareGridB"></div>
+          <span class="radio" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-primary btn-lg" id="btnCompareConfirm" type="button" disabled>사용할 세트를 골라주세요</button>
+      </div>
+    </section>
+
+    <!-- ===== STEP 4. 사진 고르기 ===== -->
+    <section class="screen" data-screen="pick">
+      <div class="screen-head">
+        <p class="eyebrow">STEP 04 — PICK</p>
+        <h2>마음에 드는 <span id="pickNeed">4</span>장을 골라요</h2>
+        <p class="lead">누르는 순서대로 칸에 들어가요 · <b id="pickOrderHint"></b><br>다시 누르면 빠지고 번호가 자동으로 정리돼요.</p>
+      </div>
+      <div class="work">
+        <div class="work-panel card">
+          <div class="panel-head"><span>사진 8장</span><span class="counter" id="pickCount">0 / 4</span></div>
+          <div class="pick-grid" id="pickGrid"></div>
+          <button class="text-btn" id="btnPickReset" type="button">선택 모두 해제</button>
+        </div>
+        <div class="work-preview pick-preview"><canvas id="pickPreview" class="preview-canvas"></canvas></div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-primary btn-lg" id="btnPickNext" type="button" disabled>보정하러 가기 →</button>
+      </div>
+    </section>
+
+    <!-- ===== STEP 5. 보정 ===== -->
+    <section class="screen" data-screen="adjust">
+      <div class="screen-head">
+        <p class="eyebrow">STEP 05 — RETOUCH</p>
+        <h2>사진 톤을 보정해요</h2>
+        <p class="lead">모든 컷에 똑같이 적용돼요.</p>
+      </div>
+      <div class="work">
+        <div class="work-preview"><canvas id="adjustPreview" class="preview-canvas"></canvas></div>
+        <div class="work-panel card">
+          <div class="panel-head"><span>필터</span><button class="text-btn" id="btnAdjustReset" type="button">원래대로</button></div>
+          <div class="toggle-row">
+            <button class="tgl" id="tglSoft" type="button" aria-pressed="false">
+              <canvas aria-hidden="true"></canvas>
+              <span class="tgl-name">✦ 뽀샤시</span><span class="tgl-state">OFF</span>
+            </button>
+            <button class="tgl" id="tglMono" type="button" aria-pressed="false">
+              <canvas aria-hidden="true"></canvas>
+              <span class="tgl-name">◐ 흑백</span><span class="tgl-state">OFF</span>
+            </button>
+          </div>
+          <div class="panel-head"><span>세부 보정</span></div>
+          <label class="slider"><span class="s-name">☀ 밝기</span><output for="rngBright">0</output>
+            <input type="range" id="rngBright" min="-50" max="50" step="1" value="0"></label>
+          <label class="slider"><span class="s-name">◍ 채도</span><output for="rngSat">0</output>
+            <input type="range" id="rngSat" min="-100" max="100" step="1" value="0"></label>
+          <label class="slider"><span class="s-name">◑ 선명도</span><output for="rngCon">0</output>
+            <input type="range" id="rngCon" min="-50" max="50" step="1" value="0"></label>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-ghost btn-lg" id="btnAdjustBack" type="button">← 사진 다시 고르기</button>
+        <button class="btn btn-primary btn-lg" id="btnAdjustNext" type="button">꾸미러 가기 →</button>
+      </div>
+    </section>
+
+    <!-- ===== STEP 6. 꾸미기 ===== -->
+    <section class="screen" data-screen="decorate">
+      <div class="screen-head">
+        <p class="eyebrow">STEP 06 — DECORATE</p>
+        <h2>프레임을 꾸며요</h2>
+        <p class="lead">스타일 → 색상 → 문구 → 글씨체 순서로 골라보세요.</p>
+      </div>
+      <div class="work">
+        <div class="work-preview"><canvas id="decoPreview" class="preview-canvas"></canvas></div>
+        <div class="work-panel card">
+          <div class="panel-head"><span>① 프레임 스타일</span></div>
+          <div class="style-grid" id="styleGrid"></div>
+          <div class="panel-head"><span>② 배경 색상</span></div>
+          <div class="swatches" id="swatches"></div>
+          <div class="panel-head"><span>③ 하단 문구</span><span class="counter" id="captionCount">0 / 20</span></div>
+          <input class="text-input" id="captionInput" type="text" placeholder="예) 2학년 3반 최고 ♥" autocomplete="off" enterkeyhint="done" />
+          <div class="panel-head"><span>④ 글씨체</span></div>
+          <div class="font-list" id="fontList"></div>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-ghost btn-lg" id="btnDecoBack" type="button">← 보정으로</button>
+        <button class="btn btn-primary btn-lg" id="btnDecoNext" type="button">스티커 붙이러 가기 →</button>
+      </div>
+    </section>
+
+    <!-- ===== STEP 7. 스티커 ===== -->
+    <section class="screen" data-screen="sticker">
+      <div class="screen-head">
+        <p class="eyebrow">STEP 07 — STICKER</p>
+        <h2>스티커를 붙여요</h2>
+        <p class="lead">스티커를 누르면 추가돼요 · <b>끌어서</b> 옮기고 · <b>⤡</b>로 크기 · <b>↻</b>로 회전<br>필요 없으면 <b>휴지통으로 끌어서</b> 버려요.</p>
+      </div>
+      <div class="work">
+        <div class="work-preview sticker-preview">
+          <div class="sticker-stage" id="stkStage">
+            <canvas id="stkPreview" class="preview-canvas"></canvas>
+            <div class="stk-layer" id="stkLayer"></div>
+          </div>
+          <div class="trash" id="stkTrash" aria-hidden="true"><span class="trash-ico">🗑</span> 여기로 끌어서 버리기</div>
+        </div>
+        <div class="work-panel card">
+          <div class="panel-head"><span>스티커 고르기</span><span class="counter" id="stkCount">0 / 20</span></div>
+          <div class="sticker-grid" id="stickerGrid"></div>
+          <div class="panel-head"><span>고른 스티커</span><button class="text-btn" id="btnStkClear" type="button" disabled>모두 지우기</button></div>
+          <div class="stk-tools" id="stkTools">
+            <button class="tool-btn" data-act="smaller" type="button" disabled><b>－</b>작게</button>
+            <button class="tool-btn" data-act="bigger" type="button" disabled><b>＋</b>크게</button>
+            <button class="tool-btn" data-act="rotate" type="button" disabled><b>↻</b>회전</button>
+            <button class="tool-btn" data-act="copy" type="button" disabled><b>⧉</b>복제</button>
+            <button class="tool-btn danger" data-act="delete" type="button" disabled><b>🗑</b>삭제</button>
+          </div>
+          <p class="tool-hint">사진 위 스티커를 한 번 누르면 선택돼요. 빈 곳을 누르면 선택이 풀려요.</p>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-ghost btn-lg" id="btnStkBack" type="button">← 꾸미기로</button>
+        <button class="btn btn-primary btn-lg" id="btnStkNext" type="button">완성하기 ✦</button>
+      </div>
+    </section>
+
+    <!-- ===== STEP 8. 전송 ===== -->
+    <section class="screen" data-screen="send">
+      <div id="sendReady">
+        <div class="screen-head">
+          <p class="eyebrow">STEP 08 — SEND</p>
+          <h2>완성! 선생님께 보낼까요?</h2>
+          <p class="lead">보낸 뒤에는 수정할 수 없어요.</p>
+        </div>
+        <div class="final-wrap"><img id="sendImg" class="final-img" alt="완성된 사진" /></div>
+        <p class="demo-notice" id="demoNotice" hidden>부스 모드 — 이 기기에 저장되고, 선생님이 [선생님 모드]에서 바로 인쇄해 주세요.</p>
+        <div class="send-progress" id="sendProgress" hidden><i id="sendBar"></i></div>
+        <p class="send-status" id="sendStatus" role="status"></p>
+        <div class="action-bar">
+          <button class="btn btn-ghost btn-lg" id="btnSendBack" type="button">← 스티커로</button>
+          <button class="btn btn-pink btn-lg" id="btnSend" type="button" disabled>선생님께 보내기 →</button>
+        </div>
+      </div>
+      <div id="sendDone" class="done" hidden>
+        <div class="done-badge" aria-hidden="true">✓</div>
+        <h2 id="doneMsg">선생님께 전송이 완료되었습니다!<br>프린트될 때까지 잠시 기다려주세요.</h2>
+        <div class="final-wrap"><img id="doneImg" class="final-img" alt="전송한 사진" /></div>
+        <div class="action-bar">
+          <button class="btn btn-primary btn-xl" id="btnHome" type="button">처음으로 돌아가기</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="flash" id="flash" aria-hidden="true"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+</html>
